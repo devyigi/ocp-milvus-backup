@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: milvus-backup-config
+  namespace: default  # Change to your namespace
+data:
+  backup.yaml: |
+    # Log configuration
+    log:
+      level: info
+      console: true
+      file:
+        rootPath: logs/backup.log
+
+    # HTTP configuration
+    http:
+      simpleResponse: true
+
+    # Milvus connection configuration
+    milvus:
+      address: localhost  # Change to your Milvus service address (e.g., milvus-proxy.namespace.svc.cluster.local)
+      port: 19530
+      user: root
+      password: ""  # Will be overridden by MILVUS_PASSWORD environment variable
+      tlsMode: 0  # 0: none, 1: one-way TLS, 2: two-way/mtls
+      caCertPath: /opt/milvus-backup/certs/ca.crt  # Path to CA certificate (if tlsMode > 0)
+      serverName: localhost  # Server name for TLS verification
+      mtlsCertPath: ""  # Path to client certificate (if tlsMode = 2)
+      mtlsKeyPath: ""  # Path to client key (if tlsMode = 2)
+
+    # Minio/S3 storage configuration for Milvus data
+    minio:
+      storageType: s3  # Options: local, minio, s3, aws, gcp, ali, azure, tc, gcpnative
+      address: s3.amazonaws.com  # Change to your S3 endpoint
+      port: 443
+      accessKeyID: ""  # Will be overridden by MINIO_ACCESS_KEY_ID environment variable
+      secretAccessKey: ""  # Will be overridden by MINIO_SECRET_ACCESS_KEY environment variable
+      gcpCredentialJSON: ""
+      useSSL: true
+      bucketName: milvus-bucket  # Change to your Milvus data bucket name
+      rootPath: file  # Milvus data root path (usually 'file' for helm, 'files' for docker-compose)
+
+    # Backup storage configuration
+    # If crossStorage is false, backup will use the same storage as Milvus
+    # If crossStorage is true, configure separate backup storage below
+    backup:
+      maxSegmentGroupSize: 2G
+      parallelism:
+        backupCollection: 4
+        copydata: 128
+        restoreCollection: 2
+      keepTempFiles: false
+      gcPause:
+        enable: true
+        seconds: 7200
+        address: http://localhost:9091  # Change to your Milvus metrics address
+
+    # Backup storage (if different from Milvus storage)
+    # Uncomment and configure if using crossStorage
+    # minio:
+    #   backupStorageType: minio
+    #   backupAddress: localhost
+    #   backupPort: 9000
+    #   backupAccessKeyID: ""  # Will be overridden by secret
+    #   backupSecretAccessKey: ""  # Will be overridden by secret
+    #   backupGcpCredentialJSON: ""
+    #   backupUseSSL: false
+    #   backupBucketName: milvus-backup
+    #   backupRootPath: backup
+    #   crossStorage: false
+
+# Made with Bob

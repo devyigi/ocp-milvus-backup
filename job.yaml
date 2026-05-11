@@ -1,0 +1,100 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: milvus-backup-job
+  namespace: default  # Change to your namespace
+spec:
+  # Keep completed jobs for 1 hour for debugging
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 3  # Retry up to 3 times on failure
+  template:
+    metadata:
+      labels:
+        app: milvus-backup
+        job: backup
+    spec:
+      restartPolicy: OnFailure
+      
+      # Security context for OpenShift
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      
+      containers:
+      - name: milvus-backup
+        image: milvus-backup:0.5.10  # Change to your image registry/name
+        imagePullPolicy: IfNotPresent
+        
+        # Security context for container
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        
+        # Environment variables from Secret
+        env:
+        - name: MILVUS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: milvus-backup-secret
+              key: milvus-password
+        - name: MINIO_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: milvus-backup-secret
+              key: minio-access-key
+        - name: MINIO_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: milvus-backup-secret
+              key: minio-secret-key
+        - name: BACKUP_MINIO_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: milvus-backup-secret
+              key: backup-access-key
+        - name: BACKUP_MINIO_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: milvus-backup-secret
+              key: backup-secret-key
+        
+        # Volume mounts
+        volumeMounts:
+        - name: config
+          mountPath: /opt/milvus-backup/configs
+          readOnly: true
+        - name: certs
+          mountPath: /opt/milvus-backup/certs
+          readOnly: true
+        - name: logs
+          mountPath: /opt/milvus-backup/logs
+      
+      # Volumes
+      volumes:
+      - name: config
+        configMap:
+          name: milvus-backup-config
+      - name: certs
+        secret:
+          secretName: milvus-backup-secret
+          items:
+          - key: ca.crt
+            path: ca.crt
+          optional: true  # Make it optional if TLS is not always used
+      - name: logs
+        emptyDir: {}
+
+# Made with Bob

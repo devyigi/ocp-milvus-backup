@@ -29,7 +29,6 @@ spec:
         # Security context for container
         securityContext:
           allowPrivilegeEscalation: false
-          runAsUser: 1001
           capabilities:
             drop:
             - ALL

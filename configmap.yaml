@@ -40,8 +40,6 @@ data:
       bucketName: milvus-bucket  # Change based on your deployment (a-bucket for docker-compose, milvus-bucket for helm)
       rootPath: file  # Change based on your deployment (files for docker-compose, file for helm)
 
-    # Backup storage configuration
-    minio:
       # Backup storage settings (S3)
       backupStorageType: s3  # Options: local, minio, s3, aws, gcp, ali, azure, tc, gcpnative
       backupAddress: s3.amazonaws.com  # Change to your backup S3 endpoint

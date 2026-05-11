@@ -47,15 +47,17 @@ oc login
 # Get the registry route
 REGISTRY=$(oc get route default-route -n openshift-image-registry -o jsonpath='{.spec.host}')
 
-# Login to OpenShift registry
-podman login -u $(oc whoami) -p $(oc whoami -t) $REGISTRY
+# Login to OpenShift registry (use --tls-verify=false for self-signed certs)
+podman login --tls-verify=false -u $(oc whoami) -p $(oc whoami -t) $REGISTRY
 
 # Tag for OpenShift registry
-podman tag milvus-backup:0.5.10 $REGISTRY/your-namespace/milvus-backup:0.5.10
+podman tag milvus-backup:0.5.10 $REGISTRY/cpd-instance/milvus-backup:0.5.10
 
-# Push to OpenShift registry
-podman push $REGISTRY/your-namespace/milvus-backup:0.5.10
+# Push to OpenShift registry (use --tls-verify=false for self-signed certs)
+podman push --tls-verify=false $REGISTRY/cpd-instance/milvus-backup:0.5.10
 ```
+
+**Note:** If your OpenShift registry uses self-signed certificates, you'll need to add the `--tls-verify=false` flag to both `podman login` and `podman push` commands as shown above. Alternatively, you can use the automated build script:
 
 ## Step 2: Configure the Deployment
 

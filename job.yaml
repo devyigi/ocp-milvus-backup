@@ -74,13 +74,13 @@ spec:
         # Volume mounts
         volumeMounts:
         - name: config
-          mountPath: /opt/milvus-backup/configs
+          mountPath: /opt/backup/configs
           readOnly: true
         - name: certs
-          mountPath: /opt/milvus-backup/certs
+          mountPath: /opt/backup/certs
           readOnly: true
         - name: logs
-          mountPath: /opt/milvus-backup/logs
+          mountPath: /opt/backup/logs
       
       # Volumes
       volumes:

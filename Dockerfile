@@ -2,7 +2,7 @@
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
 
 # Set metadata
-LABEL maintainer="Milvus Backup Container" \
+LABEL maintainer="IBM - Yiğithan Osmanoğlu" \
       description="Containerized Milvus Backup Tool for OpenShift" \
       version="0.5.10"
 
@@ -13,21 +13,19 @@ RUN microdnf install -y shadow-utils && \
     microdnf clean all
 
 # Set working directory
-WORKDIR /opt/milvus-backup
+WORKDIR /opt/backup
 
-# Copy the binary and configuration files
-COPY --chown=milvus:milvus milvus-backup /opt/milvus-backup/
-COPY --chown=milvus:milvus LICENSE /opt/milvus-backup/
-COPY --chown=milvus:milvus README.md /opt/milvus-backup/
+# Copy the binary
+COPY --chown=milvus:milvus milvus-backup /opt/backup/
 
 # Create directories for configs, logs, and backups
-RUN mkdir -p /opt/milvus-backup/configs \
-             /opt/milvus-backup/logs \
-             /opt/milvus-backup/backups && \
-    chown -R milvus:milvus /opt/milvus-backup
+RUN mkdir -p /opt/backup/configs \
+             /opt/backup/logs \
+             /opt/backup/backups && \
+    chown -R milvus:milvus /opt/backup
 
 # Make the binary executable
-RUN chmod +x /opt/milvus-backup/milvus-backup
+RUN chmod +x /opt/backup/milvus-backup
 
 # Switch to non-root user
 USER 1001
@@ -36,8 +34,8 @@ USER 1001
 EXPOSE 8080
 
 # Set environment variables
-ENV PATH="/opt/milvus-backup:${PATH}"
+ENV PATH="/opt/backup:${PATH}"
 
 # Default command - run backup and exit (for Kubernetes Job)
 # The config file will be mounted from ConfigMap
-CMD ["./milvus-backup", "create", "--config", "/opt/milvus-backup/configs/backup.yaml"]
+CMD ["./milvus-backup", "create", "--config", "/opt/backup/configs/backup.yaml"]

@@ -23,7 +23,7 @@ data:
       user: root
       password: ""  # Will be overridden by MILVUS_PASSWORD environment variable
       tlsMode: 0  # 0: none, 1: one-way TLS, 2: two-way/mtls
-      caCertPath: /opt/milvus-backup/certs/ca.crt  # Path to CA certificate (if tlsMode > 0)
+      caCertPath: /opt/backup/certs/ca.crt  # Path to CA certificate (if tlsMode > 0)
       serverName: localhost  # Server name for TLS verification
       mtlsCertPath: ""  # Path to client certificate (if tlsMode = 2)
       mtlsKeyPath: ""  # Path to client key (if tlsMode = 2)
